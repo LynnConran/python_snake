@@ -2,10 +2,16 @@ import numpy as np  # I'm too used to arrays
 import random
 import snake_stack as s_s
 
+fruit = (-1, -1)
+snake_dir = 0
+
+#     1
+# 2       0
+#     3
+
 
 def make_grid(y_len, x_len):
     grid = np.zeros((x_len, y_len))
-    place_fruit(grid)
     return grid
 
 
@@ -20,6 +26,9 @@ def make_snake(grid):
 
 def draw_snake(grid, head):
     cur_snake = head
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            grid[i][j] = 0
     while cur_snake is not None:
         grid[cur_snake.y_loc, cur_snake.x_loc] = 1
         cur_snake = cur_snake.next_snake
@@ -27,18 +36,40 @@ def draw_snake(grid, head):
 
 
 def place_fruit(grid):
-    spots = len(grid) * len(grid[0])
-    num = random.randint(0, spots - 1)
-    while grid[int(num / len(grid)), num % len(grid[0])] == 1:
+    global fruit
+    if fruit == (-1, -1):
+        spots = len(grid) * len(grid[0])
         num = random.randint(0, spots - 1)
-    grid[int(num / len(grid)), num % len(grid[0])] = 2
-    return num
+        while grid[int(num / len(grid)), num % len(grid[0])] == 1:
+            num = random.randint(0, spots - 1)
+        fruit = (int(num / len(grid)), num % len(grid[0]))
+    grid[fruit[0]][fruit[1]] = 2
+
+
+def move_snake(grid, head):
+    if snake_dir == 0:
+        new_pos = (head.y_loc, head.x_loc + 1)
+    elif snake_dir == 1:
+        new_pos = (head.y_loc - 1, head.x_loc)
+    elif snake_dir == 2:
+        new_pos = (head.y_loc, head.x_loc - 1)
+    else:
+        new_pos = (head.y_loc + 1, head.x_loc)
+    new = s_s.SnakeStack(new_pos[0], new_pos[1])
+    new.next_snake = head
+    head = new
+    global fruit
+    grow = new_pos == fruit
+    head.move_loc(grow)
+    if grow:
+        fruit = (-1, -1)
+    draw_snake(grid, head)
+    return head
 
 
 if __name__ == '__main__':
     my_grid = make_grid(10, 10)
     my_head = make_snake(my_grid)
-    draw_snake(my_grid, my_head)
+    my_head = move_snake(my_grid, my_head)
+    my_head = move_snake(my_grid, my_head)
     print(my_grid)
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
