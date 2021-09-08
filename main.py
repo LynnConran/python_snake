@@ -1,9 +1,11 @@
 import numpy as np  # I'm too used to arrays
 import random
 import snake_stack as s_s
+from pynput import keyboard
 
 fruit = (-1, -1)
 snake_dir = 0
+running = True
 
 #     1
 # 2       0
@@ -13,6 +15,20 @@ snake_dir = 0
 def make_grid(y_len, x_len):
     grid = np.zeros((x_len, y_len))
     return grid
+
+
+def on_press(key):
+    global snake_dir, running
+    if key == keyboard.Key.up:
+        snake_dir = 1
+    elif key == keyboard.Key.left:
+        snake_dir = 2
+    elif key == keyboard.Key.down:
+        snake_dir = 3
+    elif key == keyboard.Key.right:
+        snake_dir = 0
+    elif key == keyboard.Key.esc:
+        running = False
 
 
 def make_snake(grid):
@@ -68,8 +84,12 @@ def move_snake(grid, head):
 
 
 if __name__ == '__main__':
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
     my_grid = make_grid(10, 10)
     my_head = make_snake(my_grid)
     my_head = move_snake(my_grid, my_head)
     my_head = move_snake(my_grid, my_head)
     print(my_grid)
+    while running:
+        pass
