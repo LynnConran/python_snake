@@ -13,6 +13,13 @@ class SnakeStack:
         elif not grow:
             self.next_snake = None
 
+    def check_for_snake(self, y, x):
+        if y == self.y_loc and x == self.x_loc:
+            return True
+        elif self.next_snake is not None:
+            return self.next_snake.check_for_snake(y, x)
+        return False
+
     def add_segment(self, y_loc, x_loc):  # For use in snake construction
         if self.next_snake is None:
             self.next_snake = SnakeStack(y_loc, x_loc)

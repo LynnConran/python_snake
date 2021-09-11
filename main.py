@@ -93,22 +93,22 @@ def move_snake(grid):
     y_max = len(grid) - 1
     x_max = len(grid[0]) - 1
     if snake_dir == 0:
-        if head.x_loc == x_max:
+        if head.x_loc == x_max or head.check_for_snake(head.y_loc, head.x_loc + 1):
             running = False
             return
         new_pos = (head.y_loc, head.x_loc + 1)
     elif snake_dir == 1:
-        if head.y_loc == 0:
+        if head.y_loc == 0 or head.check_for_snake(head.y_loc - 1, head.x_loc):
             running = False
             return
         new_pos = (head.y_loc - 1, head.x_loc)
     elif snake_dir == 2:
-        if head.x_loc == 0:
+        if head.x_loc == 0 or head.check_for_snake(head.y_loc, head.x_loc - 1):
             running = False
             return
         new_pos = (head.y_loc, head.x_loc - 1)
     else:
-        if head.y_loc == y_max:
+        if head.y_loc == y_max or head.check_for_snake(head.y_loc + 1, head.x_loc):
             running = False
             return
         new_pos = (head.y_loc + 1, head.x_loc)
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     # move_snake(my_grid)
 
     while running:
+        time.sleep(wait_time)
         move_snake(my_grid)
         print(my_grid)
         print()
-        time.sleep(wait_time)
