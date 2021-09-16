@@ -1,5 +1,6 @@
 import numpy as np  # I'm too used to arrays
 import random
+import tkinter as tk
 import snake_stack as s_s
 from pynput import keyboard
 import time
@@ -8,7 +9,10 @@ fruit = (-1, -1)
 snake_dir = 0
 running = True
 head = s_s.SnakeStack(-1, -1)
-wait_time = 1
+WAIT_TIME = 0.25
+WIN_X = 500
+WIN_Y = 300
+PIXELS = 20 # how many pixels should each section of the grid contain
 
 #     1
 # 2       0
@@ -80,14 +84,16 @@ def draw_snake(grid):
 def place_fruit(grid):
     global fruit
     if fruit == (-1, -1):
-        spots = len(grid) * len(grid[0])
-        num = random.randint(0, spots - 1)
-        while grid[int(num / len(grid)), num % len(grid[0])] == 1:
-            num = random.randint(0, spots - 1)
-        fruit = (int(num / len(grid)), num % len(grid[0]))
+        num_x = random.randint(0, len(grid[0]) - 1)
+        num_y = random.randint(0, len(grid) - 1)
+        while grid[num_y][num_x] == 1:
+            num_x = random.randint(0, len(grid[0]) - 1)
+            num_y = random.randint(0, len(grid) - 1)
+        fruit = (num_y, num_x)
     grid[fruit[0]][fruit[1]] = 2
 
 
+# internal method used to move the snake
 def move_snake(grid):
     global fruit, head, running
     y_max = len(grid) - 1
@@ -122,16 +128,41 @@ def move_snake(grid):
     draw_snake(grid)
 
 
+def draw_grid(canvas, grid):
+    global WIN_X, WIN_Y, PIXELS
+    for x in range(int(WIN_X / PIXELS)):
+        for y in range(int((WIN_Y - 20) / PIXELS)):
+            x1, y1, x2, y2 = x * PIXELS, y * PIXELS, x * PIXELS + PIXELS, y * PIXELS + PIXELS
+            if grid[y][x] == 1:
+                canvas.create_rectangle(x1, y1, x2, y2, fill='red')
+            elif grid[y][x] == 2:
+                canvas.create_rectangle(x1, y1, x2, y2, fill='pink')
+            else:
+                canvas.create_rectangle(x1, y1, x2, y2, fill='grey')
+    for i in range(int(WIN_X / PIXELS)):
+        x1, y1, x2, y2 = i * PIXELS, 20, i * PIXELS, WIN_Y
+        canvas.create_line(x1, y1, x2, y2, fill='black')
+    for i in range(int((WIN_Y - 20) / PIXELS)):
+        x1, y1, x2, y2 = 0, i * PIXELS, WIN_X, i * PIXELS
+        canvas.create_line(x1, y1, x2, y2, fill='black')
+
+
 if __name__ == '__main__':
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
-    my_grid = make_grid(10, 10)
+    my_grid = make_grid(int(WIN_X / PIXELS), int((WIN_Y - 20) / PIXELS))
     make_snake(my_grid)
-    # move_snake(my_grid)
-    # move_snake(my_grid)
+    root = tk.Tk()
+    root.title("Snake")
+    root.geometry(str(WIN_X) + 'x' + str(WIN_Y))
+    canvas = tk.Canvas(root, height=WIN_Y, width=WIN_X, bg="grey")
+    draw_grid(canvas, my_grid)
+    canvas.pack()
+    label = tk.Label(root, textvar="Hello, World!", bg="yellow").place(x=0, y=0)
+    root.update()
 
     while running:
-        time.sleep(wait_time)
+        time.sleep(WAIT_TIME)
         move_snake(my_grid)
-        print(my_grid)
-        print()
+        draw_grid(canvas, my_grid)
+        root.update()
